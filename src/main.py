@@ -1,12 +1,20 @@
 import click
 
-from src.model.create_model import create_neural_network
+from src.model.layer import Layer
+from src.model.nn import NeuralNetwork
 
 
 @click.command()
 def console():
     """Entry point to access the Neural Network"""
-    uribo_neural_network = create_neural_network()
+    uribo_neural_network = NeuralNetwork(
+        input_dim=3,
+        layers=[
+            Layer(3),
+            Layer(1),
+        ],
+    )
+
     print(f"I am Uribo! This is me: {uribo_neural_network}")
 
 
