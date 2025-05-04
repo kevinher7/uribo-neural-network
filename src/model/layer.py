@@ -1,5 +1,19 @@
+from neuron import Neuron
+import numpy as np
+from numpy.typing import NDArray
+
+
 class Layer:
-    def __init__(self, num_neurons) -> None:
+    def __init__(self, num_neurons: int, input_dim: int) -> None:
         self.num_neurons = num_neurons
-        print("I am a Layer")
-        pass
+        self.neurons = []
+        # neuronsリストにnum_nueronで指定した個数分ユニットを追加
+        for index in range(num_neurons):
+            self.neurons.append(Neuron(input_dim))
+
+    def forward(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
+        self.outputs = []
+        # neuronsリストに追加されたユニットを順に実行し、それぞれの結果をoutputsリストに追加
+        for neuron in self.neurons:
+            self.outputs.append(neuron.forward(data))
+        return np.array(self.outputs)
