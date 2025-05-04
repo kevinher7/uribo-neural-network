@@ -4,7 +4,7 @@ from numpy.typing import NDArray
 
 
 class Layer:
-    def __init__(self, num_neuron: int, input_dim) -> None:
+    def __init__(self, num_neuron: int, input_dim: int) -> None:
         self.neurons = []
         # neuronsリストにnum_nueronで指定した個数分ユニットを追加
         for index in range(num_neuron):
