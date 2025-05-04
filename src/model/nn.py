@@ -15,6 +15,8 @@ class NeuralNetwork:
         for index, layer in enumerate(layers):
             # Give input dimension as the previous layer's number of neurons
             layer.input_dim = self.layers[index].num_neurons
+            layer.build()
+
             self.layers.append(layer)
 
     def forward(self, data: NDArray[np.float64], *, classification: bool = False) -> float:
