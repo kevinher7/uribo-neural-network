@@ -10,8 +10,9 @@ class NeuralNetwork:
         # Remove the first layer (hidden) and append it to NN
         first_hidden_layer = layers.pop(0)
         first_hidden_layer.input_dim = input_dim
-        self.layers = [first_hidden_layer]
+        first_hidden_layer.build()
 
+        self.layers = [first_hidden_layer]
         for index, layer in enumerate(layers):
             # Give input dimension as the previous layer's number of neurons
             layer.input_dim = self.layers[index].num_neurons
