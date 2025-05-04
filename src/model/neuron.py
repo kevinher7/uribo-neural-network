@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Neuron:
-    def __init__(self, input_dim, output_dim=1):
+    def __init__(self, input_dim, output_dim=1) -> None:
         # TODO いずれこのweightとbiasは変更する必要がありそう（ローカル最小に引っかかったり学習速度の関係があるから）
         # TODO 重みベクトルはベクトルに限らず行列になる可能性（output_dim=>2のとき）があるため、それは後で検討する
         self.weight = np.random.randn(input_dim)
