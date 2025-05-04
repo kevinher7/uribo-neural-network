@@ -12,7 +12,7 @@ class Neuron:
         # ユニット入力→活性化→活性化関数→ユニット出力の流れを総合して行う
         a = self._make_activations(x)
         y = self._activation_function(a)
-        return y
+        return float(y)
 
     def _make_activations(self, x):
         # forward()は一つのunitに関してinputからoutputを計算するmethod
