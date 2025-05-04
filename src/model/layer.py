@@ -1,5 +1,6 @@
 from neuron import Neuron
 import numpy as np
+from numpy.typing import NDArray
 
 
 class Layer:
@@ -9,7 +10,7 @@ class Layer:
         for index in range(num_neuron):
             self.neurons.append(Neuron(input_dim))
 
-    def forward(self, data):
+    def forward(self, data: list) -> NDArray[np.float64]:
         self.outputs = []
         # neuronsリストに追加されたユニットを順に実行し、それぞれの結果をoutputsリストに追加
         for neuron in self.neurons:
