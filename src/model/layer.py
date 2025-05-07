@@ -4,10 +4,11 @@ from numpy.typing import NDArray
 
 
 class Layer:
-    def __init__(self, num_neurons: int) -> None:
+    def __init__(self, num_neurons: int, *, output_layer: bool = False) -> None:
         self.num_neurons = num_neurons
         self.input_dim = 0
         self.neurons = []
+        self.output_layer = output_layer
 
     def forward(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
         self.outputs = []
@@ -20,5 +21,15 @@ class Layer:
 
     def build(self) -> None:
         # neuronsリストにnum_nueronで指定した個数分ユニットを追加
-        for index in range(self.num_neurons):
+        if self.output_layer:
+            for _index in range(self.num_neurons):
+                self.neurons.append(Neuron(self.input_dim))
+
+            return
+
+        # Add "bias neuron" to neuron list
+        self.neurons.append(Neuron(self.input_dim, bias_neuron=True))
+
+        # Add remaining neurons
+        for _index in range(self.num_neurons - 1):
             self.neurons.append(Neuron(self.input_dim))
