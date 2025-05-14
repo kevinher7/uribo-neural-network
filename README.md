@@ -28,4 +28,8 @@ poetry run start
 
 # Usage
 
-As of now, the start script just prints out the memory address of the Neural Network.
+It currently supports predicting a value using tanh activation functions for a given input.
+
+# TODO
+
+- Implement backpropagation
