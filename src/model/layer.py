@@ -1,6 +1,7 @@
 from src.model.neuron import Neuron
 import numpy as np
 from numpy.typing import NDArray
+from typing import Self
 
 
 class Layer:
@@ -11,6 +12,8 @@ class Layer:
         self.output_layer = output_layer
 
     def forward(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
+        if self.augmentation:
+            data = np.append(data, 1)
         self.outputs = []
         activations = np.matmul(data, self.weights)
 
@@ -28,6 +31,14 @@ class Layer:
         for i in range(len(self.neurons) - 1, 0, -1):
             self.neurons[i].backward(delta_next_layer, weights_to_next_layer)
 
-    def build(self, input_dim) -> None:
+    def build(self, input_dim, augmentation: bool) -> Self:
+        self.augmentation = augmentation
+
         self.weights = np.random.randn(input_dim, self.num_neurons)
         self.neurons: list[Neuron] = [Neuron() for _index in range(self.num_neurons)]
+        if augmentation:
+            # Append a row of ones at the end
+            ones_row = np.random.randn(1, self.num_neurons)
+            self.weights = np.vstack([self.weights, ones_row])
+
+        return self

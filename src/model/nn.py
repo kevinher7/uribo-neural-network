@@ -7,19 +7,17 @@ from src.model.layer import Layer
 class NeuralNetwork:
     def __init__(self, input_dim: int, layers: list[Layer], *, augmentation: bool = True) -> None:
         """Initialize NN by assigning input dimensions and building all Layers"""
-        if augmentation:
-            input_dim += 1
-
-            # Add one neuron to each layer except the output layer
-            for layer in layers[:-1]:
-                layer.num_neurons += 1
+        self.augmentation = augmentation
 
         self.layers: list[Layer] = []
-        for layer in layers:
-            layer.build(input_dim)
-            # Add built layer to NN
+        for layer in layers[:-1]:
+            layer.build(input_dim, augmentation)
             self.layers.append(layer)
             input_dim = layer.num_neurons
+
+        # Build output layer without augmentation
+        layers[-1].build(input_dim, False)
+        self.layers.append(layers[-1])
 
     def forward(self, data: NDArray[np.float64], *, classification: bool = False) -> float:
         """
@@ -33,9 +31,6 @@ class NeuralNetwork:
         Returns:
             output (float): for regression
         """
-        # Add bias neuron to input data
-        data = np.append(data, [1])
-
         layer_output = data
         for layer in self.layers:
             layer_output = layer.forward(layer_output)
