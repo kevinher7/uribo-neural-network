@@ -14,6 +14,7 @@ class Layer:
     def forward(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
         if self.augmentation:
             data = np.append(data, 1)
+
         self.outputs = []
         activations = np.matmul(data, self.weights)
 
