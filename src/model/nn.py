@@ -6,29 +6,20 @@ from src.model.layer import Layer
 
 class NeuralNetwork:
     def __init__(self, input_dim: int, layers: list[Layer], *, augmentation: bool = True) -> None:
-        """Initialize NN by assigning input dimensions to all Layers"""
+        """Initialize NN by assigning input dimensions and building all Layers"""
         if augmentation:
             input_dim += 1
+
             # Add one neuron to each layer except the output layer
             for layer in layers[:-1]:
                 layer.num_neurons += 1
 
-        # Remove the first layer (hidden) and append it to NN
-        first_hidden_layer = layers.pop(0)
-        first_hidden_layer.input_dim = input_dim
-        first_hidden_layer.build()
-
-        self.layers = [first_hidden_layer]
-
-        for index, layer in enumerate(layers):
-            if index == len(layers) - 1:
-                layer.output_layer = True
-
-            # Give input dimension as the previous layer's number of neurons
-            layer.input_dim = self.layers[index].num_neurons
-            layer.build()
-
+        self.layers: list[Layer] = []
+        for layer in layers:
+            layer.build(input_dim)
+            # Add built layer to NN
             self.layers.append(layer)
+            input_dim = layer.num_neurons
 
     def forward(self, data: NDArray[np.float64], *, classification: bool = False) -> float:
         """
