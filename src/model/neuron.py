@@ -23,6 +23,13 @@ class Neuron:
         y = self._activation_function(a)
         return float(y)
 
+    def backward(
+        self,
+        delta_next_layer: NDArray[np.float64],
+        weights_to_next_layer: NDArray[np.float64],
+    ) -> NDArray[np.float64]:
+        pass
+
     def _make_activations(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         # forward()は一つのunitに関してinputからoutputを計算するmethod
 
