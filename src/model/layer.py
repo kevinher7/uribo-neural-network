@@ -11,16 +11,6 @@ class Layer:
         self.output_layer = output_layer
 
     def forward(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
-        """
-        Performs inference for the given data. It only works on Flatten data (1 dimensional data)
-        Calculation steps:
-            1. Calculate the activations
-            2. Call the activate function from neurons
-            3. Return outputs to be used by next layer
-
-        Returns:
-            NDArray: result array of forward propagating through the layer
-        """
         self.outputs = []
         activations = np.matmul(data, self.weights)
 
