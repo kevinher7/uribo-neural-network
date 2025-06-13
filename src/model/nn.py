@@ -50,13 +50,24 @@ class NeuralNetwork:
             layer_output = layer.forward(layer_output)
 
         if classification:
-            output = self._softmax(layer_output)
+            self.output = self._softmax(layer_output)
         else:
-            output = layer_output
+            self.output = layer_output
 
-        return output
+        return self.output
+
+    def _backward(self, target_data: NDArray[np.float64]) -> None:
+        """
+        Backward Propagation to calculate gradients
+        """
+        # Calculate deltas for output layer
+        delta_next_layer = self.output - target_data
+
+        # Backpropagate through the remaining hidden layers
+        for i in range(len(self.layers) - 2, 0, -1):
+            delta_next_layer = self.layers[i].backward(delta_next_layer, self.layers[i + 1].weights)
 
     def _softmax() -> None:
         raise NotImplementedError(
-            "Neural Network does not support classification (only regression)"
+            "Uribo Neural Network does not support classification (only regression)"
         )
