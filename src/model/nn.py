@@ -31,7 +31,9 @@ class NeuralNetwork:
         Returns:
             output (float): for regression
         """
+        # Understood as the "input layer" output
         layer_output = data
+
         for layer in self.layers:
             layer_output = layer.forward(layer_output)
 
