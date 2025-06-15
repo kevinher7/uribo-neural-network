@@ -25,8 +25,12 @@ class Layer:
         deltas_next_layer: NDArray[np.float64],
         weights_to_next_layer: NDArray[np.float64],
     ) -> NDArray[np.float64]:
-        # grad = np.matmul(self.outputs, self.weights)
-        pass
+        grad = []
+        for unit_output in self.outputs:
+            grad.append(np.matmul(unit_output, deltas_next_layer))
+
+        self.grad = np.array(grad)
+        print(self.grad)
 
     def build(self, input_dim, augmentation: bool) -> Self:
         """
