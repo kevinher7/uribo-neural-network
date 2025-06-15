@@ -21,7 +21,7 @@ def console():
 
     print(f"I am Uribo! This is me: {uribo_neural_network}")
     print(f"This is my output with for x={x_data}: {uribo_neural_network.forward(x_data)}")
-    print(f"Let's train!! {uribo_neural_network.train(x_data, y_data, epochs=2)}")
+    print(f"Let's train!! {uribo_neural_network.train(x_data, y_data, epochs=1)}")
 
 
 if __name__ == "__main__":
