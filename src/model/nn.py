@@ -18,13 +18,16 @@ class NeuralNetwork:
     def train(
         self, data: NDArray[np.float64], targets: NDArray[np.float64], *, epochs: int
     ) -> NDArray[np.float64]:
+        if self.augmentation:
+            data = np.append(data, 1)
+
         for _e in range(epochs):
-            output = self.forward(data)
+            output = self._forward(data)
             r = self._backward(data, targets, output)
 
         return 2
 
-    def forward(self, data: NDArray[np.float64], *, classification: bool = False) -> float:
+    def _forward(self, data: NDArray[np.float64], *, classification: bool = False) -> float:
         """
         Forward method for layer class.
         Args:
@@ -37,9 +40,6 @@ class NeuralNetwork:
             output (float): for regression
         """
         # Understood as the "input layer" output
-        if self.augmentation:
-            data = np.append(data, 1)
-
         layer_output = data
 
         for layer in self.layers:
@@ -71,9 +71,28 @@ class NeuralNetwork:
                 deltas_next_layer, self.layers[-(i + 1)].weights
             )
 
+        # Calculate gradient at input layer level
         input_grad = np.outer(deltas_next_layer, input_data.T)
+        # print([layer.grad for layer in self.layers])
+        # print([layer.grad.shape for layer in self.layers])
+        self._update_weights(input_grad)
 
     def _softmax() -> None:
         raise NotImplementedError(
             "Uribo Neural Network does not support classification (only regression)"
         )
+
+    # TODO: Consider updating weights (and store them in dummy variables)
+    # while backpropagation continues to improve time complexity
+    def _update_weights(
+        self, input_grad: NDArray[np.float64], learning_rate: float = 0.01, optimizer: str = "SGD"
+    ) -> None:
+        """
+        Updates weights via the provided optimizer.
+        Currently only supports Stochastic Gradient Descent
+        """
+        # Update input layer weights
+        self.layers[0].weights -= learning_rate * input_grad.T
+
+        for layer_num in range(len(self.layers[1:])):
+            self.layers[layer_num].weights -= learning_rate * self.layers[layer_num + 1].grad
