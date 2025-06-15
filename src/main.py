@@ -15,6 +15,7 @@ def console():
         input_dim=x_data.size,
         layers=[
             Layer(3),
+            Layer(2),
             Layer(1),
         ],
     )
