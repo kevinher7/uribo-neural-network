@@ -6,11 +6,16 @@ from typing import Self
 class Layer:
     def __init__(self, num_neurons: int, *, output_layer: bool = False) -> None:
         self.num_neurons = num_neurons
+        self.is_output = False
         self.grad = np.zeros(1)
 
     def forward(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
         activations = np.matmul(data, self.weights)
-        self.outputs = self._activation_function(activations)
+        # Skip activation
+        if self.is_output:
+            self.outputs = activations
+        else:
+            self.outputs = self._activation_function(activations)
 
         if self.augmentation:
             # Append bias unit to outputs

@@ -15,6 +15,9 @@ class NeuralNetwork:
             self.layers.append(layer)
             input_dim = layer.num_neurons
 
+        # Set last layer as output layer
+        self.layers[-1].is_output = True
+
     def train(
         self, data: NDArray[np.float64], targets: NDArray[np.float64], *, epochs: int
     ) -> NDArray[np.float64]:
@@ -23,9 +26,10 @@ class NeuralNetwork:
 
         for _e in range(epochs):
             output = self._forward(data)
-            r = self._backward(data, targets, output)
+            print(f"Model output: {output}")
+            self._backward(data, targets, output)
 
-        return 2
+        return
 
     def _forward(self, data: NDArray[np.float64], *, classification: bool = False) -> float:
         """
@@ -85,7 +89,7 @@ class NeuralNetwork:
     # TODO: Consider updating weights (and store them in dummy variables)
     # while backpropagation continues to improve time complexity
     def _update_weights(
-        self, input_grad: NDArray[np.float64], learning_rate: float = 0.01, optimizer: str = "SGD"
+        self, input_grad: NDArray[np.float64], learning_rate: float = 0.1, optimizer: str = "SGD"
     ) -> None:
         """
         Updates weights via the provided optimizer.
@@ -93,6 +97,7 @@ class NeuralNetwork:
         """
         # Update input layer weights
         self.layers[0].weights -= learning_rate * input_grad.T
-
         for layer_num in range(len(self.layers[1:])):
-            self.layers[layer_num].weights -= learning_rate * self.layers[layer_num + 1].grad
+            self.layers[-layer_num - 1].weights -= (
+                learning_rate * self.layers[-layer_num - 2].grad.T
+            )
