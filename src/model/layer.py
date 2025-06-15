@@ -6,6 +6,7 @@ from typing import Self
 class Layer:
     def __init__(self, num_neurons: int, *, output_layer: bool = False) -> None:
         self.num_neurons = num_neurons
+        self.grad = np.zeros(1)
 
     def forward(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
         activations = np.matmul(data, self.weights)
@@ -24,7 +25,18 @@ class Layer:
     ) -> NDArray[np.float64]:
         # Calculate the gradient
         # grad_j = d_k*z_j
-        self.grad = np.matmul(deltas_next_layer, self.outputs.reshape(1, -1))
+        self.grad = np.outer(deltas_next_layer, self.outputs.T)
+        # grad E_kj
+        # Row: k (next layer unit)
+        # Column: j (current layer unit)
+
+        # Calculate this layer's delta
+        if self.augmentation:
+            # Remove the bias related parameters (bias delta is not needed)
+            # since no units send connections to it
+            # (so this delta is not involved gradient calculations)
+            self.outputs = self.outputs[:-1]
+            weights_to_next_layer = weights_to_next_layer[:-1]
 
         # Since we use hyperbolic tangent as the activation function
         # h(x)  = tanh(x)
@@ -33,7 +45,9 @@ class Layer:
 
         # Calculate this layer's deltas (errors)
         # delta_j = h'(a_j)* sum(w_kj*d_k)
-        sum = np.matmul(deltas_next_layer, weights_to_next_layer.reshape(1, -1))
+        # .T to transpose the weight matrix
+        sum = np.matmul(deltas_next_layer, weights_to_next_layer.T)
+
         layer_deltas = activation_func_derivatives * sum
 
         return layer_deltas

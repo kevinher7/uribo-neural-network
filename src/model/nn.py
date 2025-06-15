@@ -46,7 +46,7 @@ class NeuralNetwork:
             layer_output = layer.forward(layer_output)
 
         if self.augmentation:
-            layer_output = layer_output[-1]
+            layer_output = layer_output[:-1]
 
         if classification:
             return self._softmax(layer_output)
@@ -67,19 +67,11 @@ class NeuralNetwork:
 
         # Backpropagate through the remaining hidden layers
         for i in range(len(self.layers) - 1):
-            deltas_next_layer = self.layers[i].backward(
-                deltas_next_layer, self.layers[i + 1].weights
+            deltas_next_layer = self.layers[-(i + 2)].backward(
+                deltas_next_layer, self.layers[-(i + 1)].weights
             )
 
-        # Last gradient calculation with input "layer"
-        if self.augmentation:
-            input_data = np.append(input_data, 1)
-
-        print(deltas_next_layer)
-        print(input_data)
-        input_grad = np.matmul(deltas_next_layer, input_data)
-
-        print(input_grad)
+        input_grad = np.outer(deltas_next_layer, input_data.T)
 
     def _softmax() -> None:
         raise NotImplementedError(
