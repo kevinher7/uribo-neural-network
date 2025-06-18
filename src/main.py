@@ -30,7 +30,7 @@ def console():
 
     print(f"I am Uribo! This is me: {uribo_neural_network}")
     print("Let's train!!")
-    uribo_neural_network.train(x_data, y_data, epochs=20)
+    uribo_neural_network.train(x_data, y_data, epochs=1000)
     print("I have finalized my training regime.")
 
 
