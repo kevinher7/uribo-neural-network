@@ -21,15 +21,16 @@ class NeuralNetwork:
     def train(
         self, data: NDArray[np.float64], targets: NDArray[np.float64], *, epochs: int
     ) -> NDArray[np.float64]:
-        if self.augmentation:
-            data = np.append(data, 1)
-
         for _e in range(epochs):
-            output = self._forward(data)
-            print(f"Model output: {output}")
-            self._backward(data, targets, output)
+            for index, datapoint in enumerate(data):
+                if self.augmentation:
+                    datapoint = np.append(datapoint, 1)
 
-        return
+                output = self._forward(datapoint)
+                self._backward(datapoint, targets[index], output)
+
+        print(self._forward(np.append(data[0], 1)) * 100)
+        print(self._forward(np.append(data[1], 1)) * 100)
 
     def _forward(self, data: NDArray[np.float64], *, classification: bool = False) -> float:
         """
@@ -48,9 +49,6 @@ class NeuralNetwork:
 
         for layer in self.layers:
             layer_output = layer.forward(layer_output)
-
-        if self.augmentation:
-            layer_output = layer_output[:-1]
 
         if classification:
             return self._softmax(layer_output)
@@ -77,8 +75,6 @@ class NeuralNetwork:
 
         # Calculate gradient at input layer level
         input_grad = np.outer(deltas_next_layer, input_data.T)
-        # print([layer.grad for layer in self.layers])
-        # print([layer.grad.shape for layer in self.layers])
         self._update_weights(input_grad)
 
     def _softmax() -> None:
@@ -89,7 +85,7 @@ class NeuralNetwork:
     # TODO: Consider updating weights (and store them in dummy variables)
     # while backpropagation continues to improve time complexity
     def _update_weights(
-        self, input_grad: NDArray[np.float64], learning_rate: float = 0.1, optimizer: str = "SGD"
+        self, input_grad: NDArray[np.float64], learning_rate: float = 0.001, optimizer: str = "SGD"
     ) -> None:
         """
         Updates weights via the provided optimizer.

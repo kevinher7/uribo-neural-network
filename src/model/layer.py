@@ -10,12 +10,15 @@ class Layer:
         self.grad = np.zeros(1)
 
     def forward(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
+        self.inputs = data
         activations = np.matmul(data, self.weights)
-        # Skip activation
+
         if self.is_output:
+            # Skip activation and return
             self.outputs = activations
-        else:
-            self.outputs = self._activation_function(activations)
+            return self.outputs
+
+        self.outputs = self._activation_function(activations)
 
         if self.augmentation:
             # Append bias unit to outputs
