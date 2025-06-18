@@ -40,17 +40,7 @@ class NeuralNetwork:
             # Print loss every 50 epochs
             if epoch % 50 == 0:
                 avg_loss = total_loss / len(data)
-                print(f"Epoch {epoch}, Average Loss: {avg_loss}")
-
-        # Test on some sample points
-        print("\nFinal predictions:")
-        for i in [0, 10, 20]:  # Test on x = -10, 0, 10 (normalized)
-            if i < len(data):
-                test_input = np.append(data[i], 1) if self.augmentation else data[i]
-                prediction = self._forward(test_input)
-                print(
-                    f"x = {data[i][0] * 10:.1f}, predicted y = {prediction * 100}, actual y = {targets[i] * 100:.2f}"
-                )
+                print(f"Epoch {epoch:4d} | Loss: {avg_loss}")
 
     def _forward(self, data: NDArray[np.float64], *, classification: bool = False) -> float:
         """
@@ -120,5 +110,3 @@ class NeuralNetwork:
         raise NotImplementedError(
             "Uribo Neural Network does not support classification (only regression)"
         )
-
-    # Note: Weight updates are now integrated into the _backward method for efficiency
