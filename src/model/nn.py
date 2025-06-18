@@ -85,24 +85,13 @@ class NeuralNetwork:
         """
         Backward Propagation to calculate gradients and update weights
         """
-        # Store activations for each layer (needed for gradient calculation)
-        activations = [input_data]
-        current_activation = input_data
-
-        for layer in self.layers:
-            current_activation = layer.forward(current_activation)
-            activations.append(layer.outputs if hasattr(layer, "outputs") else current_activation)
-
         # Calculate delta for output layer (derivative of MSE loss)
         delta = model_output - target_data
 
         # Backpropagate through all layers in reverse order
         for i in reversed(range(len(self.layers))):
-            # Get the input to this layer
-            layer_input = activations[i]
-
             # Calculate gradient for this layer
-            gradient = np.outer(delta, layer_input)
+            gradient = np.outer(delta, self.layers[i].inputs)
 
             # Update weights for this layer
             self.layers[i].weights -= learning_rate * gradient.T
@@ -117,10 +106,9 @@ class NeuralNetwork:
                 # Propagate delta back
                 delta = np.dot(delta, weights_no_bias.T)
 
-                # Apply activation function derivative (tanh derivative)
-                # Get the outputs of the previous layer (without bias)
                 prev_outputs = self.layers[i - 1].outputs
-                if self.augmentation and hasattr(self.layers[i - 1], "outputs"):
+                if self.augmentation:
+                    # Get the outputs of the previous layer (without bias)
                     prev_outputs = (
                         prev_outputs[:-1] if len(prev_outputs.shape) == 1 else prev_outputs
                     )
