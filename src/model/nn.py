@@ -19,18 +19,38 @@ class NeuralNetwork:
         self.layers[-1].is_output = True
 
     def train(
-        self, data: NDArray[np.float64], targets: NDArray[np.float64], *, epochs: int
+        self,
+        data: NDArray[np.float64],
+        targets: NDArray[np.float64],
+        *,
+        epochs: int,
+        learning_rate: float = 0.01,
     ) -> NDArray[np.float64]:
-        for _e in range(epochs):
+        for epoch in range(epochs):
+            total_loss = 0.0
             for index, datapoint in enumerate(data):
                 if self.augmentation:
                     datapoint = np.append(datapoint, 1)
 
                 output = self._forward(datapoint)
-                self._backward(datapoint, targets[index], output)
+                loss = 0.5 * (output - targets[index]) ** 2  # MSE loss
+                total_loss += loss
+                self._backward(datapoint, targets[index], output, learning_rate)
 
-        print(self._forward(np.append(data[0], 1)) * 100)
-        print(self._forward(np.append(data[1], 1)) * 100)
+            # Print loss every 50 epochs
+            if epoch % 50 == 0:
+                avg_loss = total_loss / len(data)
+                print(f"Epoch {epoch}, Average Loss: {avg_loss}")
+
+        # Test on some sample points
+        print("\nFinal predictions:")
+        for i in [0, 10, 20]:  # Test on x = -10, 0, 10 (normalized)
+            if i < len(data):
+                test_input = np.append(data[i], 1) if self.augmentation else data[i]
+                prediction = self._forward(test_input)
+                print(
+                    f"x = {data[i][0] * 10:.1f}, predicted y = {prediction * 100}, actual y = {targets[i] * 100:.2f}"
+                )
 
     def _forward(self, data: NDArray[np.float64], *, classification: bool = False) -> float:
         """
@@ -60,40 +80,57 @@ class NeuralNetwork:
         input_data: NDArray[np.float64],
         target_data: NDArray[np.float64],
         model_output: NDArray[np.float64],
+        learning_rate: float,
     ) -> None:
         """
-        Backward Propagation to calculate gradients
+        Backward Propagation to calculate gradients and update weights
         """
-        # Calculate deltas for output layer
-        deltas_next_layer = model_output - target_data
+        # Store activations for each layer (needed for gradient calculation)
+        activations = [input_data]
+        current_activation = input_data
 
-        # Backpropagate through the remaining hidden layers
-        for i in range(len(self.layers) - 1):
-            deltas_next_layer = self.layers[-(i + 2)].backward(
-                deltas_next_layer, self.layers[-(i + 1)].weights
-            )
+        for layer in self.layers:
+            current_activation = layer.forward(current_activation)
+            activations.append(layer.outputs if hasattr(layer, "outputs") else current_activation)
 
-        # Calculate gradient at input layer level
-        input_grad = np.outer(deltas_next_layer, input_data.T)
-        self._update_weights(input_grad)
+        # Calculate delta for output layer (derivative of MSE loss)
+        delta = model_output - target_data
+
+        # Backpropagate through all layers in reverse order
+        for i in reversed(range(len(self.layers))):
+            # Get the input to this layer
+            layer_input = activations[i]
+
+            # Calculate gradient for this layer
+            gradient = np.outer(delta, layer_input)
+
+            # Update weights for this layer
+            self.layers[i].weights -= learning_rate * gradient.T
+
+            # Calculate delta for previous layer (if not the first layer)
+            if i > 0:
+                # Remove bias weight if augmentation is used
+                weights_no_bias = (
+                    self.layers[i].weights[:-1] if self.augmentation else self.layers[i].weights
+                )
+
+                # Propagate delta back
+                delta = np.dot(delta, weights_no_bias.T)
+
+                # Apply activation function derivative (tanh derivative)
+                # Get the outputs of the previous layer (without bias)
+                prev_outputs = self.layers[i - 1].outputs
+                if self.augmentation and hasattr(self.layers[i - 1], "outputs"):
+                    prev_outputs = (
+                        prev_outputs[:-1] if len(prev_outputs.shape) == 1 else prev_outputs
+                    )
+
+                # For tanh: derivative is 1 - tanh^2(x)
+                delta = delta * (1 - prev_outputs**2)
 
     def _softmax() -> None:
         raise NotImplementedError(
             "Uribo Neural Network does not support classification (only regression)"
         )
 
-    # TODO: Consider updating weights (and store them in dummy variables)
-    # while backpropagation continues to improve time complexity
-    def _update_weights(
-        self, input_grad: NDArray[np.float64], learning_rate: float = 0.001, optimizer: str = "SGD"
-    ) -> None:
-        """
-        Updates weights via the provided optimizer.
-        Currently only supports Stochastic Gradient Descent
-        """
-        # Update input layer weights
-        self.layers[0].weights -= learning_rate * input_grad.T
-        for layer_num in range(len(self.layers[1:])):
-            self.layers[-layer_num - 1].weights -= (
-                learning_rate * self.layers[-layer_num - 2].grad.T
-            )
+    # Note: Weight updates are now integrated into the _backward method for efficiency
