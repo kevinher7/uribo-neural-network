@@ -1,35 +1,44 @@
-from src.model.neuron import Neuron
 import numpy as np
 from numpy.typing import NDArray
+from typing import Self
 
 
 class Layer:
     def __init__(self, num_neurons: int, *, output_layer: bool = False) -> None:
         self.num_neurons = num_neurons
-        self.input_dim = 0
-        self.neurons = []
-        self.output_layer = output_layer
+        self.is_output = False
+        self.grad = np.zeros(1)
 
     def forward(self, data: NDArray[np.float64]) -> NDArray[np.float64]:
-        self.outputs = []
+        self.inputs = data
+        activations = np.matmul(data, self.weights)
 
-        # neuronsリストに追加されたユニットを順に実行し、それぞれの結果をoutputsリストに追加
-        for neuron in self.neurons:
-            self.outputs.append(neuron.forward(data))
+        if self.is_output:
+            # Skip activation and return
+            self.outputs = activations
+            return self.outputs
 
-        return np.array(self.outputs)
+        self.outputs = self._activation_function(activations)
 
-    def build(self) -> None:
-        # neuronsリストにnum_nueronで指定した個数分ユニットを追加
-        if self.output_layer:
-            for _index in range(self.num_neurons):
-                self.neurons.append(Neuron(self.input_dim))
+        if self.augmentation:
+            # Append bias unit to outputs
+            self.outputs = np.append(self.outputs, 1.0)
 
-            return
+        return self.outputs
 
-        # Add "bias neuron" to neuron list
-        self.neurons.append(Neuron(self.input_dim, bias_neuron=True))
+    def build(self, input_dim, augmentation: bool) -> Self:
+        """
+        Creates connections with previous layer as a weight array
+        """
+        self.augmentation = augmentation
 
-        # Add remaining neurons
-        for _index in range(self.num_neurons - 1):
-            self.neurons.append(Neuron(self.input_dim))
+        if augmentation:
+            input_dim += 1
+
+        self.weights = np.random.randn(input_dim, self.num_neurons)
+
+        return self
+
+    def _activation_function(self, activations: float) -> NDArray[np.float64]:
+        """Activation function. Currently only supports hyperbolic tangent"""
+        return np.tanh(activations)  # (e^x - e^(-x))/(e^x + e^(-x))
